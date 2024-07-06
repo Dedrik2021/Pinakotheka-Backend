@@ -2,11 +2,12 @@ import createHttpError from 'http-errors';
 import validator from 'validator';
 import bcrypt from 'bcrypt'
 
-import { UserModel } from '../models/index.js';
+import UserModel from '../models/index.js';
+import { verify } from '../utils/token.utils.js';
 
 const { DEFAULT_PICTURE } = process.env;
 
-export const createUser = async ({ name, email, picture, password }) => {
+export const createUser = async ({ name, email, picture, phone, password }) => {
 	if (!name || !email || !password) {
 		throw createHttpError.BadRequest('All fields are required');
 	}
@@ -32,6 +33,7 @@ export const createUser = async ({ name, email, picture, password }) => {
 		name,
 		email,
 		picture: picture || DEFAULT_PICTURE,
+        phone,
 		password,
 	}).save();
 
@@ -46,4 +48,8 @@ export const signUser = async (email, password) => {
     if (!passwordMatches) throw createHttpError.NotFound("Invalid credentials.")
 
     return user
+}
+
+export const verifyToken = async (token, secret) => {
+    return await verify(token, secret)
 }

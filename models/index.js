@@ -1,3 +1,3 @@
 import UserModel from "./userModel.js";
 
-export { UserModel }
+export default UserModel

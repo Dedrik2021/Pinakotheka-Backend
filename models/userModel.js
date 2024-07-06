@@ -13,8 +13,12 @@ const userSchema = mongoose.Schema(
 			required: [true, 'Please provide your email'],
 			unique: true,
 			lowercase: true,
-            validator: [validator.isEmail, 'Please provide a valid email'],
+			validator: [validator.isEmail, 'Please provide a valid email'],
 		},
+        phone: {
+            type: String,
+            default: null
+        },
 		picture: {
 			type: String,
 			default:
@@ -25,6 +29,10 @@ const userSchema = mongoose.Schema(
 			required: [true, 'Please provide your password'],
 			minLength: [6, 'Minimum password length is 6 characters'],
 			maxLength: [20, 'Maximum password length is 20 characters'],
+			// validate: [
+			// 	validator.isStrongPassword,
+			// 	'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character',
+			// ],
 		},
 	},
 	{
@@ -34,16 +42,16 @@ const userSchema = mongoose.Schema(
 );
 
 userSchema.pre('save', async function (next) {
-    try {
-        if (this.isNew) {
-            const salt = await bcrypt.genSalt(12);
-            const hashedPassword = await bcrypt.hash(this.password, salt);
-            this.password = hashedPassword;
-        }
-    } catch(error) {
-        next(error);
-    }
-})
+	try {
+		if (this.isNew) {
+			const salt = await bcrypt.genSalt(12);
+			const hashedPassword = await bcrypt.hash(this.password, salt);
+			this.password = hashedPassword;
+		}
+	} catch (error) {
+		next(error);
+	}
+});
 
 const UserModel = mongoose.models.UserModel || mongoose.model('UserModel', userSchema);
 

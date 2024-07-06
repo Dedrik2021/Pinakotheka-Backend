@@ -1,10 +1,13 @@
-import { createUser, signUser } from '../services/auth.service.js';
+import createHttpError from 'http-errors';
+
+import { createUser, signUser, verifyToken } from '../services/auth.service.js';
 import { generateToken } from '../services/token.service.js';
+import { findUser } from '../services/user.service.js';
 
 export const register = async (req, res, next) => {
 	try {
-		const { name, email, picture, password } = req.body;
-		const newUser = await createUser({ name, email, picture, password });
+		const { name, email, picture, phone, password } = req.body;
+		const newUser = await createUser({ name, email, picture, phone, password });
 
 		const access_token = await generateToken(
 			{ userId: newUser._id },
@@ -17,9 +20,9 @@ export const register = async (req, res, next) => {
 			process.env.REFRESH_TOKEN,
 		);
 
-        res.cookie('refresh-token', refresh_token, {
+        res.cookie('refreshtoken', refresh_token, {
             httpOnly: true,
-            path: '/api/v1/auth/refresh-token',
+            path: '/api/v1/auth/refreshtoken',
             maxAge: 30 * 24 * 60 * 60 * 1000
         })
 
@@ -29,6 +32,7 @@ export const register = async (req, res, next) => {
             user: {
                 _id: newUser._id,
                 name: newUser.name,
+                phone: newUser.phone,
                 email: newUser.email,
                 picture: newUser.picture,
             }
@@ -54,9 +58,9 @@ export const login = async (req, res, next) => {
 			process.env.REFRESH_TOKEN,
 		);
 
-        res.cookie('refresh-token', refresh_token, {
+        res.cookie('refreshtoken', refresh_token, {
             httpOnly: true,
-            path: '/api/v1/auth/refresh-token',
+            path: '/api/v1/auth/refreshtoken',
             maxAge: 30 * 24 * 60 * 60 * 1000
         })
 
@@ -66,6 +70,7 @@ export const login = async (req, res, next) => {
             user: {
                 _id: user._id,
                 name: user.name,
+                phone: newUser.phone,
                 email: user.email,
                 picture: user.picture,
             }
@@ -77,7 +82,7 @@ export const login = async (req, res, next) => {
 
 export const logout = async (req, res, next) => {
     try {
-        res.clearCookie("refresh-token", {path: "/api/v1/auth/refresh-token"})
+        res.clearCookie("refreshtoken", {path: "/api/v1/auth/refreshtoken"})
         res.status(201).json({
             message: "Logged out."
         })
@@ -88,7 +93,29 @@ export const logout = async (req, res, next) => {
 
 export const refreshToken = async (req, res, next) => {
     try {
+        const refresh_token = req.cookies.refreshtoken
+        if (!refresh_token) throw createHttpError.Unauthorized("Please login")
 
+        const check = await verifyToken(refresh_token, process.env.REFRESH_TOKEN)
+        
+        const user = await findUser(check.userId)
+
+        const access_token = await generateToken(
+			{ userId: user._id },
+			'7d',
+			process.env.ACCESS_TOKEN,
+		);
+
+        res.status(201).json({
+            access_token,
+            user: {
+                _id: user._id,
+                name: user.name,
+                phone: newUser.phone,
+                email: user.email,
+                picture: user.picture,
+            }
+        });
     } catch(error) {
         next(error)
     }
