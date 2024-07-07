@@ -70,7 +70,7 @@ export const login = async (req, res, next) => {
             user: {
                 _id: user._id,
                 name: user.name,
-                phone: newUser.phone,
+                phone: user.phone,
                 email: user.email,
                 picture: user.picture,
             }
@@ -120,3 +120,7 @@ export const refreshToken = async (req, res, next) => {
         next(error)
     }
 };
+
+export const testAuthMiddleware = async (req, res) => {
+    res.status(201).json(req.user)
+}
