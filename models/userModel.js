@@ -15,15 +15,28 @@ const userSchema = mongoose.Schema(
 			lowercase: true,
 			validator: [validator.isEmail, 'Please provide a valid email'],
 		},
-        phone: {
-            type: String,
-            default: null
-        },
+		phone: {
+			type: String,
+			default: null,
+		},
 		picture: {
 			type: String,
 			default:
 				'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png',
 		},
+		author: {
+			type: Boolean,
+			default: false,
+		},
+		customer: {
+			type: Boolean,
+			default: false,
+		},
+        politics: {
+            type: Boolean,
+            default: false,
+
+        },
 		password: {
 			type: String,
 			required: [true, 'Please provide your password'],
