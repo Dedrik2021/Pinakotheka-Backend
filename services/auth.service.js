@@ -17,13 +17,28 @@ export const createUser = async ({
 	politics,
 	password,
 }) => {
-	if (!name || !email || !password) {
-		throw createHttpError.BadRequest('All fields are required');
+	if (!customer) {
+        if (!author) {
+            throw createHttpError.BadRequest('You must be an author or a customer');
+        }
 	}
+
+	// if (!name || !email || !password || !phone) {
+	// 	throw createHttpError.BadRequest('Name, email, phone and password are required');
+	// }
+
+    if (!name) throw createHttpError.BadRequest('Name is required');
+    if (!phone) throw createHttpError.BadRequest('Phone is required');
+    if (!email) throw createHttpError.BadRequest('Email is required');
+    if (!password) throw createHttpError.BadRequest('Password is required');
 
 	if (!validator.isLength(name, { min: 2, max: 16 })) {
 		throw createHttpError.BadRequest('Name must be between 2 and 16 characters');
 	}
+
+    if (!validator.isLength(phone, { min: 9, max: 9 })) {
+        throw createHttpError.BadRequest('Phone number must be 9 characters long');
+    }
 
 	if (!validator.isEmail(email)) {
 		throw createHttpError.BadRequest('Invalid email');
@@ -37,6 +52,11 @@ export const createUser = async ({
 	if (!validator.isLength(password, { min: 6, max: 20 })) {
 		throw createHttpError.BadRequest('Password must be between 6 and 20 characters');
 	}
+
+    if (!politics) {
+        throw createHttpError.BadRequest('You must agree with our privacy policy');
+    }
+
 
 	const user = await new UserModel({
 		name,

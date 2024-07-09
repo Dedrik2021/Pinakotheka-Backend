@@ -17,7 +17,9 @@ const userSchema = mongoose.Schema(
 		},
 		phone: {
 			type: String,
-			default: null,
+			required: [true, 'Please provide your phone number'],
+			minLength: [9, 'Minimum password length is 9 characters'],
+			maxLength: [9, 'Maximum password length is 9 characters'],
 		},
 		picture: {
 			type: String,
