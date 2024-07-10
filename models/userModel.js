@@ -34,20 +34,19 @@ const userSchema = mongoose.Schema(
 			type: Boolean,
 			default: false,
 		},
-        politics: {
-            type: Boolean,
-            default: false,
-
-        },
+		politics: {
+			type: Boolean,
+			default: false,
+		},
 		password: {
 			type: String,
 			required: [true, 'Please provide your password'],
 			minLength: [6, 'Minimum password length is 6 characters'],
 			maxLength: [20, 'Maximum password length is 20 characters'],
-			// validate: [
-			// 	validator.isStrongPassword,
-			// 	'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character',
-			// ],
+			validate: [
+				validator.isStrongPassword,
+				'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character',
+			],
 		},
 	},
 	{

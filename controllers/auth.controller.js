@@ -1,6 +1,6 @@
 import createHttpError from 'http-errors';
 
-import { createUser, signUser, verifyToken } from '../services/auth.service.js';
+import { createUser, signUser, verifyToken, passwordForgot } from '../services/auth.service.js';
 import { generateToken } from '../services/token.service.js';
 import { findUser } from '../services/user.service.js';
 
@@ -137,6 +137,16 @@ export const refreshToken = async (req, res, next) => {
 	} catch (error) {
 		next(error);
 	}
+};
+
+export const forgotPassword = async (req, res, next) => {
+    try {
+        const { email } = req.body;
+        const user = await passwordForgot(email);
+        res.status(201).json({ email: user.email });
+    } catch (error) {
+        next(error);
+    }
 };
 
 export const testAuthMiddleware = async (req, res) => {
