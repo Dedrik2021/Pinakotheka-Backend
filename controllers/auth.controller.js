@@ -1,8 +1,17 @@
 import createHttpError from 'http-errors';
+import dotenv from 'dotenv';
+import { isValidObjectId } from 'mongoose';
+dotenv.config();
 
 import { createUser, signUser, verifyToken, passwordForgot } from '../services/auth.service.js';
 import { generateToken } from '../services/token.service.js';
 import { findUser } from '../services/user.service.js';
+import PasswordResetToken from '../models/passwordResetTokenModel.js';
+import { generateRandomByte } from '../utils/helper.js';
+import { transport } from '../utils/mail.js';
+import UserModel from '../models/index.js';
+
+const email_service = process.env.EMAIL;
 
 export const register = async (req, res, next) => {
 	try {
@@ -43,9 +52,9 @@ export const register = async (req, res, next) => {
 				name: newUser.name,
 				phone: newUser.phone,
 				email: newUser.email,
-                author: newUser.author,
-                customer: newUser.customer,
-                politics: newUser.politics,
+				author: newUser.author,
+				customer: newUser.customer,
+				politics: newUser.politics,
 				picture: newUser.picture,
 			},
 		});
@@ -84,9 +93,9 @@ export const login = async (req, res, next) => {
 				name: user.name,
 				phone: user.phone,
 				email: user.email,
-                author: user.author,
-                customer: user.customer,
-                politics: user.politics,
+				author: user.author,
+				customer: user.customer,
+				politics: user.politics,
 				picture: user.picture,
 			},
 		});
@@ -128,9 +137,9 @@ export const refreshToken = async (req, res, next) => {
 				name: user.name,
 				phone: newUser.phone,
 				email: user.email,
-                author: user.author,
-                customer: user.customer,
-                politics: user.politics,
+				author: user.author,
+				customer: user.customer,
+				politics: user.politics,
 				picture: user.picture,
 			},
 		});
@@ -140,13 +149,74 @@ export const refreshToken = async (req, res, next) => {
 };
 
 export const forgotPassword = async (req, res, next) => {
-    try {
-        const { email } = req.body;
-        const user = await passwordForgot(email);
-        res.status(201).json({ email: user.email });
-    } catch (error) {
-        next(error);
-    }
+	try {
+		const { email } = req.body;
+		const user = await passwordForgot(email);
+
+		const alreadyHasToken = await PasswordResetToken.findOne({ owner: user._id });
+		if (alreadyHasToken)
+			throw createHttpError.BadRequest(
+				'Only after one hour you can request for another token!',
+			);
+
+		const token = await generateRandomByte();
+		const newPasswordResetToken = await PasswordResetToken({ owner: user._id, token });
+		await newPasswordResetToken.save();
+
+		const resetPasswordUrl = `http://localhost:3000/reset-password?token=${token}&id=${user._id}`;
+
+		transport.sendMail({
+			from: `Pinakotheka <${email_service}>`,
+			to: user.email,
+			subject: 'Reset Password Link',
+			html: `
+            <p>Click here to reset Password</p>
+            <a href='${resetPasswordUrl}'>Change Password</a>
+        `,
+		});
+
+		res.status(201).json({ message: 'Link sent to your email!' });
+	} catch (error) {
+		next(error);
+	}
+};
+
+export const resetPassword = async (req, res, next) => {
+	try {
+		const { newPassword, userId, token } = req.body;
+
+        console.log(req.resetToken);
+
+		if (!newPassword) throw createHttpError.BadRequest('Password is required!');
+
+		const user = await UserModel.findById(userId);
+		const matched = await user.comparePassword(newPassword);
+		if (matched)
+			throw createHttpError.BadRequest(
+				'The new password must be different from the old one!',
+			);
+
+		user.password = newPassword;
+		await user.save();
+
+		await PasswordResetToken.findOneAndDelete({token});
+
+		transport.sendMail({
+			from: `Pinakotheka <${email_service}>`,
+			to: user.email,
+			subject: 'Password reset successfully!',
+			html: `
+                <h1>Password Reset Successfully</h1>
+                <p>Now You Can Use New Password!</p>
+            `,
+		});
+
+		res.status(201).json({
+			message: 'Password Reset Successfully! Now You Can Use New Password!',
+		});
+	} catch (error) {
+		next(error);
+	}
 };
 
 export const testAuthMiddleware = async (req, res) => {
