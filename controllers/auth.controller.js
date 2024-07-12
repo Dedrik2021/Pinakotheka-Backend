@@ -44,6 +44,15 @@ export const register = async (req, res, next) => {
 			maxAge: 30 * 24 * 60 * 60 * 1000,
 		});
 
+        // transport.sendMail({
+		// 	from: `Pinakotheka <${email_service}>`,
+		// 	to: user.email,
+		// 	subject: 'Reset Password Link',
+		// 	html: ` 
+        //     <p>Thank you for registering with Pinakotheka</p>
+        // `,
+		// });
+
 		res.status(201).json({
 			message: 'register successfully',
 			access_token,
@@ -185,31 +194,38 @@ export const resetPassword = async (req, res, next) => {
 	try {
 		const { newPassword, userId, token } = req.body;
 
-        console.log(req.resetToken);
-
 		if (!newPassword) throw createHttpError.BadRequest('Password is required!');
 
 		const user = await UserModel.findById(userId);
+        if (!user) throw createHttpError.NotFound('User not found!');
+
+        
 		const matched = await user.comparePassword(newPassword);
+        
 		if (matched)
 			throw createHttpError.BadRequest(
-				'The new password must be different from the old one!',
-			);
+        'The new password must be different from the old one!',
+    );
+    
+    const resetToken = await PasswordResetToken.findOne({ owner: user._id });
 
-		user.password = newPassword;
-		await user.save();
+    const resetTokenMatched = await resetToken.compareToken(token);
+    if (!resetTokenMatched) throw createHttpError.BadRequest('Invalid or expired password reset token!');
 
-		await PasswordResetToken.findOneAndDelete({token});
+    user.password = newPassword;
+    await user.save();
+        
+	await PasswordResetToken.findOneAndDelete({token: resetToken.token});
 
-		transport.sendMail({
-			from: `Pinakotheka <${email_service}>`,
-			to: user.email,
-			subject: 'Password reset successfully!',
-			html: `
-                <h1>Password Reset Successfully</h1>
-                <p>Now You Can Use New Password!</p>
-            `,
-		});
+		// transport.sendMail({
+		// 	from: `Pinakotheka <${email_service}>`,
+		// 	to: user.email,
+		// 	subject: 'Password reset successfully!',
+		// 	html: `
+        //         <h1>Password Reset Successfully</h1>
+        //         <p>Now You Can Use New Password!</p>
+        //     `,
+		// });
 
 		res.status(201).json({
 			message: 'Password Reset Successfully! Now You Can Use New Password!',
