@@ -1,6 +1,7 @@
 import createHttpError from 'http-errors';
 import dotenv from 'dotenv';
 import { isValidObjectId } from 'mongoose';
+import crypto from 'crypto';
 dotenv.config();
 
 import { createUser, signUser, verifyToken, passwordForgot } from '../services/auth.service.js';
@@ -16,6 +17,10 @@ const email_service = process.env.EMAIL;
 export const register = async (req, res, next) => {
 	try {
 		const { name, email, picture, phone, author, customer, politics, password } = req.body;
+
+		const emailVerificationToken = crypto.randomBytes(32).toString('hex');
+		const emailVerificationExpires = Date.now() + 24 * 60 * 60 * 1000; // 1 day
+
 		const newUser = await createUser({
 			name,
 			email,
@@ -25,7 +30,11 @@ export const register = async (req, res, next) => {
 			customer,
 			politics,
 			password,
+			emailVerificationExpires,
+			emailVerificationToken
 		});
+
+		const emailVerificationLink = `${process.env.CLIENT_URL}/verify-email?token=${emailVerificationToken}&id=${newUser._id}`;
 
 		const access_token = await generateToken(
 			{ userId: newUser._id },
@@ -44,17 +53,18 @@ export const register = async (req, res, next) => {
 			maxAge: 30 * 24 * 60 * 60 * 1000,
 		});
 
-        // transport.sendMail({
-		// 	from: `Pinakotheka <${email_service}>`,
-		// 	to: user.email,
-		// 	subject: 'Reset Password Link',
-		// 	html: ` 
-        //     <p>Thank you for registering with Pinakotheka</p>
-        // `,
-		// });
+		transport.sendMail({
+			from: `Pinakotheka <${email_service}>`,
+			to: newUser.email,
+			subject: 'Email Verification Link',
+			html: ` 
+            <p>Thank you for registering with Pinakotheka. Please click the link below to verify your email address:</p>
+            <a href="${emailVerificationLink}">Verify Email</a>
+        `,
+		});
 
 		res.status(201).json({
-			message: 'register successfully',
+			message: 'Registration successful. Please check your email for verification link.',
 			access_token,
 			user: {
 				_id: newUser._id,
@@ -65,8 +75,45 @@ export const register = async (req, res, next) => {
 				customer: newUser.customer,
 				politics: newUser.politics,
 				picture: newUser.picture,
+				isEmailVerified: newUser.isEmailVerified,
+				token: access_token,
 			},
 		});
+	} catch (error) {
+		next(error);
+	}
+};
+
+export const verifyEmail = async (req, res, next) => {
+	try {
+		const { token, id } = req.query;
+
+		if (!token || !id) {
+			throw createHttpError.BadRequest('Invalid request');
+		}
+
+		const user = await UserModel.findById(id);
+		if (!user) {
+			throw createHttpError.NotFound('User not found');
+		}
+
+		if (user.emailVerificationToken !== token || user.emailVerificationExpires < Date.now()) {
+			throw createHttpError.BadRequest('Invalid or expired token');
+		}
+
+		user.emailVerificationToken = undefined;
+		user.emailVerificationExpires = undefined;
+		user.isEmailVerified = true;
+		await user.save();
+	
+		transport.sendMail({
+			from: `Pinakotheka <${email_service}>`,
+			to: user.email,
+			subject: 'Email Verified',
+			html: 'Thank you. Your email has been verified successfully',
+		});
+
+		res.status(200).json({ message: 'Email verified successfully' });
 	} catch (error) {
 		next(error);
 	}
@@ -106,6 +153,8 @@ export const login = async (req, res, next) => {
 				customer: user.customer,
 				politics: user.politics,
 				picture: user.picture,
+				isEmailVerified: user.isEmailVerified,
+				token: access_token,
 			},
 		});
 	} catch (error) {
@@ -148,8 +197,10 @@ export const refreshToken = async (req, res, next) => {
 				email: user.email,
 				author: user.author,
 				customer: user.customer,
+				token: access_token,
 				politics: user.politics,
 				picture: user.picture,
+				isEmailVerified: user.isEmailVerified,
 			},
 		});
 	} catch (error) {
@@ -172,7 +223,7 @@ export const forgotPassword = async (req, res, next) => {
 		const newPasswordResetToken = await PasswordResetToken({ owner: user._id, token });
 		await newPasswordResetToken.save();
 
-		const resetPasswordUrl = `http://localhost:3000/reset-password?token=${token}&id=${user._id}`;
+		const resetPasswordUrl = `${process.env.CLIENT_URL}/reset-password?token=${token}&id=${user._id}`;
 
 		transport.sendMail({
 			from: `Pinakotheka <${email_service}>`,
@@ -197,38 +248,38 @@ export const resetPassword = async (req, res, next) => {
 		if (!newPassword) throw createHttpError.BadRequest('Password is required!');
 
 		const user = await UserModel.findById(userId);
-        if (!user) throw createHttpError.NotFound('User not found!');
+		if (!user) throw createHttpError.NotFound('User not found!');
 
-        
 		const matched = await user.comparePassword(newPassword);
-        
+
 		if (matched)
 			throw createHttpError.BadRequest(
-        'The new password must be different from the old one!',
-    );
-    
-    const resetToken = await PasswordResetToken.findOne({ owner: user._id });
+				'The new password must be different from the old one!',
+			);
 
-    const resetTokenMatched = await resetToken.compareToken(token);
-    if (!resetTokenMatched) throw createHttpError.BadRequest('Invalid or expired password reset token!');
+		const resetToken = await PasswordResetToken.findOne({ owner: user._id });
 
-    user.password = newPassword;
-    await user.save();
-        
-	await PasswordResetToken.findOneAndDelete({token: resetToken.token});
+		const resetTokenMatched = await resetToken.compareToken(token);
+		if (!resetTokenMatched)
+			throw createHttpError.BadRequest('Invalid or expired password reset token!');
 
-		// transport.sendMail({
-		// 	from: `Pinakotheka <${email_service}>`,
-		// 	to: user.email,
-		// 	subject: 'Password reset successfully!',
-		// 	html: `
-        //         <h1>Password Reset Successfully</h1>
-        //         <p>Now You Can Use New Password!</p>
-        //     `,
-		// });
+		user.password = newPassword;
+		await user.save();
+
+		await PasswordResetToken.findOneAndDelete({ token: resetToken.token });
+
+		transport.sendMail({
+			from: `Pinakotheka <${email_service}>`,
+			to: user.email,
+			subject: 'Password reset successfully!',
+			html: `
+                <h1>Your password has been reset successfully</h1>
+                <p>Now you can use new password!</p>
+            `,
+		});
 
 		res.status(201).json({
-			message: 'Password Reset Successfully! Now You Can Use New Password!',
+			message: 'Password reset successfully! Now you can use new password!',
 		});
 	} catch (error) {
 		next(error);

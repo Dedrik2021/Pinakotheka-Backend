@@ -16,6 +16,8 @@ export const createUser = async ({
 	customer,
 	politics,
 	password,
+	emailVerificationExpires,
+	emailVerificationToken,
 }) => {
 	if (!author && !customer && !name && !phone && !email && !politics && !password)
 		throw createHttpError.BadRequest('All fields are required');
@@ -64,6 +66,8 @@ export const createUser = async ({
 		customer,
 		politics,
 		password,
+		emailVerificationExpires,
+		emailVerificationToken
 	}).save();
 
 	return user;
@@ -77,11 +81,15 @@ export const signUser = async (email, password) => {
 	const user = await UserModel.findOne({ email: email.toLowerCase() }).lean();
 	if (!user) throw createHttpError.NotFound('Invalid Email');
 
+	
     if (!password) throw createHttpError.BadRequest('Password is required');
 
+	
 	const passwordMatches = await bcrypt.compare(password, user.password);
 	if (!passwordMatches) throw createHttpError.NotFound('Invalid Password');
 
+	if (!user.isEmailVerified) throw createHttpError.BadRequest('Please verify your email');
+	
 	return user;
 };
 
