@@ -1,6 +1,5 @@
 import createHttpError from 'http-errors';
 import dotenv from 'dotenv';
-import { isValidObjectId } from 'mongoose';
 import crypto from 'crypto';
 dotenv.config();
 
@@ -76,7 +75,7 @@ export const register = async (req, res, next) => {
 				politics: newUser.politics,
 				picture: newUser.picture,
 				isEmailVerified: newUser.isEmailVerified,
-				token: access_token,
+				token: "",
 			},
 		});
 	} catch (error) {
@@ -193,7 +192,7 @@ export const refreshToken = async (req, res, next) => {
 			user: {
 				_id: user._id,
 				name: user.name,
-				phone: newUser.phone,
+				phone: user.phone,
 				email: user.email,
 				author: user.author,
 				customer: user.customer,
@@ -212,6 +211,12 @@ export const forgotPassword = async (req, res, next) => {
 	try {
 		const { email } = req.body;
 		const user = await passwordForgot(email);
+
+		const access_token = await generateToken(
+			{ userId: user._id },
+			'7d',
+			process.env.ACCESS_TOKEN,
+		);
 
 		const alreadyHasToken = await PasswordResetToken.findOne({ owner: user._id });
 		if (alreadyHasToken)
@@ -235,7 +240,22 @@ export const forgotPassword = async (req, res, next) => {
         `,
 		});
 
-		res.status(201).json({ message: 'Link sent to your email!' });
+		res.status(201).json({
+			message: 'Link sent to your email!',
+			access_token,
+			user: {
+				_id: user._id,
+				name: user.name,
+				phone: user.phone,
+				email: user.email,
+				author: user.author,
+				customer: user.customer,
+				token: "",
+				politics: user.politics,
+				picture: user.picture,
+				isEmailVerified: user.isEmailVerified,
+			},
+		});
 	} catch (error) {
 		next(error);
 	}
@@ -268,6 +288,12 @@ export const resetPassword = async (req, res, next) => {
 
 		await PasswordResetToken.findOneAndDelete({ token: resetToken.token });
 
+		const access_token = await generateToken(
+			{ userId: user._id },
+			'7d',
+			process.env.ACCESS_TOKEN,
+		);
+
 		transport.sendMail({
 			from: `Pinakotheka <${email_service}>`,
 			to: user.email,
@@ -280,6 +306,19 @@ export const resetPassword = async (req, res, next) => {
 
 		res.status(201).json({
 			message: 'Password reset successfully! Now you can use new password!',
+			access_token,
+			user: {
+				_id: user._id,
+				name: user.name,
+				phone: user.phone,
+				email: user.email,
+				author: user.author,
+				customer: user.customer,
+				token: "",
+				politics: user.politics,
+				picture: user.picture,
+				isEmailVerified: user.isEmailVerified,
+			},
 		});
 	} catch (error) {
 		next(error);
