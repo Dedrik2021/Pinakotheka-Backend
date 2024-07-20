@@ -30,7 +30,7 @@ export const register = async (req, res, next) => {
 			politics,
 			password,
 			emailVerificationExpires,
-			emailVerificationToken
+			emailVerificationToken,
 		});
 
 		const emailVerificationLink = `${process.env.CLIENT_URL}/verify-email?token=${emailVerificationToken}&id=${newUser._id}`;
@@ -75,7 +75,7 @@ export const register = async (req, res, next) => {
 				politics: newUser.politics,
 				picture: newUser.picture,
 				isEmailVerified: newUser.isEmailVerified,
-				token: "",
+				token: '',
 			},
 		});
 	} catch (error) {
@@ -104,7 +104,7 @@ export const verifyEmail = async (req, res, next) => {
 		user.emailVerificationExpires = undefined;
 		user.isEmailVerified = true;
 		await user.save();
-	
+
 		transport.sendMail({
 			from: `Pinakotheka <${email_service}>`,
 			to: user.email,
@@ -250,7 +250,7 @@ export const forgotPassword = async (req, res, next) => {
 				email: user.email,
 				author: user.author,
 				customer: user.customer,
-				token: "",
+				token: '',
 				politics: user.politics,
 				picture: user.picture,
 				isEmailVerified: user.isEmailVerified,
@@ -286,8 +286,6 @@ export const resetPassword = async (req, res, next) => {
 		user.password = newPassword;
 		await user.save();
 
-		await PasswordResetToken.findOneAndDelete({ token: resetToken.token });
-
 		const access_token = await generateToken(
 			{ userId: user._id },
 			'7d',
@@ -299,10 +297,12 @@ export const resetPassword = async (req, res, next) => {
 			to: user.email,
 			subject: 'Password reset successfully!',
 			html: `
-                <h1>Your password has been reset successfully</h1>
-                <p>Now you can use new password!</p>
+			<h1>Your password has been reset successfully</h1>
+			<p>Now you can use new password!</p>
             `,
 		});
+
+		await PasswordResetToken.findOneAndDelete({ token: resetToken.token });
 
 		res.status(201).json({
 			message: 'Password reset successfully! Now you can use new password!',
@@ -314,7 +314,7 @@ export const resetPassword = async (req, res, next) => {
 				email: user.email,
 				author: user.author,
 				customer: user.customer,
-				token: "",
+				token: '',
 				politics: user.politics,
 				picture: user.picture,
 				isEmailVerified: user.isEmailVerified,

@@ -43,8 +43,18 @@ const userSchema = mongoose.Schema(
 			required: [true, 'Please provide your password'],
 			minLength: [6, 'Minimum password length is 6 characters'],
 			validate: [
-				validator.isStrongPassword,
-				'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character',
+				{
+					validator: (value) =>
+						validator.isStrongPassword(value, {
+							minLength: 6,
+							minLowercase: 1,
+							minUppercase: 1,
+							minNumbers: 1,
+							minSymbols: 1,
+						}),
+					message:
+						'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character',
+				},
 			],
 		},
 		emailVerificationToken: {
