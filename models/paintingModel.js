@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 const paintingSchema = mongoose.Schema({
-    author: {
+    authorId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'UserModel',
         required: true,
@@ -31,8 +31,8 @@ const paintingSchema = mongoose.Schema({
         required: [true, 'Please provide a size'],
     }
 }, {
-    collection: 'paints',
+    collection: 'paintings',
     timestamps: true,
 });
 
-export default mongoose.models.Paint || mongoose.model('Painting', paintingSchema);
+export default mongoose.models.PaintingModel || mongoose.model('PaintingModel', paintingSchema);

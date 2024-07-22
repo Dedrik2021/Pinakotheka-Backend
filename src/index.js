@@ -1,8 +1,10 @@
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
+import { Server } from 'socket.io';
 
 import app from './app.js';
 import logger from '../configs/logger.config.js';
+import SocketServer from './SocketServer.js';
 
 dotenv.config();
 const { DATABASE_URL } = process.env;
@@ -26,6 +28,18 @@ mongoose
 
 server = app.listen(PORT, () => {
 	logger.info(`Server is running on port http://localhost:${PORT}`);
+});
+
+const io = new Server(server, {
+	pingTimeout: 60000,
+	cors: {
+		origin: process.env.CLIENT_ENDPOINT,
+	},
+});
+
+io.on('connection', (socket) => {
+	logger.info(`Socket message connected successfully`);
+	SocketServer(socket, io);
 });
 
 const exitHandler = () => {
