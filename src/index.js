@@ -10,7 +10,7 @@ dotenv.config();
 const { DATABASE_URL } = process.env;
 
 const PORT = process.env.PORT || 8080;
-let server;
+export let server;
 
 if (process.env.NODE_ENV !== 'production') {
 	mongoose.set('debug', true);
@@ -30,7 +30,7 @@ server = app.listen(PORT, () => {
 	logger.info(`Server is running on port http://localhost:${PORT}`);
 });
 
-const io = new Server(server, {
+export const io = new Server(server, {
 	pingTimeout: 60000,
 	cors: {
 		origin: process.env.CLIENT_ENDPOINT,
@@ -40,6 +40,9 @@ const io = new Server(server, {
 io.on('connection', (socket) => {
 	logger.info(`Socket message connected successfully`);
 	SocketServer(socket, io);
+	socket.on("create-painting", (painting) => {
+		io.emit("newPainting", painting)
+	})
 });
 
 const exitHandler = () => {

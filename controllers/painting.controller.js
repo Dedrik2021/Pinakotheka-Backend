@@ -1,5 +1,6 @@
 import { createPainting } from "../services/painting.service.js"
 import PaintingModel from "../models/paintingModel.js"
+import { io } from "../src/index.js";
 
 export const add_painting = async (req, res, next) => {
     try {   
@@ -13,6 +14,7 @@ export const add_painting = async (req, res, next) => {
             material,
             size
         })
+        io.emit('newPainting', newPainting);
         res.status(201).json({
 			message: 'Created your painting are successfully.',
 			painting: {
@@ -58,3 +60,36 @@ export const get_painting_by_id = async (req, res, next) => {
         next(error)
     }
 }
+
+export const update_painting_by_id = async (req, res, next) => {
+    try {
+        const { paintingId } = req.body;
+        const updateData = req.body;
+
+        const painting = await PaintingModel.findByIdAndUpdate(paintingId, updateData, { new: true });
+
+        if (!painting) {
+            return res.status(404).json({ message: 'Painting not found' });
+        }
+
+        res.status(200).json(painting);
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const delete_painting_by_id = async (req, res, next) => {
+    try {
+        const { paintingId } = req.body;
+
+        const painting = await PaintingModel.findByIdAndDelete(paintingId);
+
+        if (!painting) {
+            return res.status(404).json({ message: 'Painting not found' });
+        }
+
+        res.status(200).json({ message: 'Painting deleted successfully' });
+    } catch (error) {
+        next(error);
+    }
+};
