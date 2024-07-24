@@ -4,7 +4,7 @@ import { io } from "../src/index.js";
 
 export const add_painting = async (req, res, next) => {
     try {   
-        const {authorId, title, description, price, image, material, size} = req.body
+        const {authorId, author, title, description, price, image, material, size} = req.body
         const newPainting = await createPainting({
             authorId,
             title,
@@ -12,9 +12,9 @@ export const add_painting = async (req, res, next) => {
             price,
             image,
             material,
+            author,
             size
         })
-        io.emit('newPainting', newPainting);
         res.status(201).json({
 			message: 'Created your painting are successfully.',
 			painting: {

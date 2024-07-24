@@ -6,6 +6,10 @@ const paintingSchema = mongoose.Schema({
         ref: 'UserModel',
         required: true,
     },
+    author: {
+        type: String,
+        required: true
+    },
     title: {
         type: String,
         required: [true, 'Please provide a title'],

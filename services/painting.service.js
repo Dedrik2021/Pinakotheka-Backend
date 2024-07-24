@@ -10,6 +10,7 @@ export const createPainting = async ({
 	price,
 	image,
 	material,
+    author,
 	size,
 }) => {
 	if (!title && !price && !description && !image && !material && !size)
@@ -35,6 +36,7 @@ export const createPainting = async ({
 	
 	const painting = await new PaintingModel({
 		authorId,
+        author,
 		title,
 		description,
 		price,
