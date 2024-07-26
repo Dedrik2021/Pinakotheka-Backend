@@ -33,6 +33,10 @@ const paintingSchema = mongoose.Schema({
     size: {
         type: String,
         required: [true, 'Please provide a size'],
+    },
+    path: {
+        type: String,
+        required: true,
     }
 }, {
     collection: 'paintings',

@@ -41,6 +41,7 @@ export const createPainting = async ({
 		description,
 		price,
 		image,
+        path: "/painting/",
 		material,
 		size,
 	}).save();

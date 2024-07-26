@@ -66,6 +66,8 @@ export const createUser = async ({
 		customer,
 		politics,
 		password,
+		path: "/user/",
+		rating: 0,
 		emailVerificationExpires,
 		emailVerificationToken
 	}).save();

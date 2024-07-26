@@ -8,6 +8,14 @@ const userSchema = mongoose.Schema(
 			type: String,
 			required: [true, 'Please provide your name'],
 		},
+		path: {
+			type: String,
+			required: true,
+		},
+		rating: {
+			type: Number,
+			required: true,
+		},
 		email: {
 			type: String,
 			required: [true, 'Please provide your email'],
