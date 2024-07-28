@@ -30,6 +30,10 @@ const paintingSchema = mongoose.Schema({
         type: String,
         required: [true, 'Please provide a material'],
     },
+    style: {
+        type: String,
+        required: [true, 'Please provide a style'],
+    },
     size: {
         type: String,
         required: [true, 'Please provide a size'],
