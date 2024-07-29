@@ -11,11 +11,12 @@ export const createPainting = async ({
 	image,
 	material,
     author,
+	style,
 	size,
 }) => {
 	if (!title && !price && !description && !image && !material && !size)
 		throw createHttpError.BadRequest(
-			'Title, price, description, image, material, size fields are required',
+			'Title, price, description, image, material, style, size fields are required',
 		);
 
 	if (!title) throw createHttpError.BadRequest('Title is required');
@@ -32,6 +33,7 @@ export const createPainting = async ({
 	if (!price) throw createHttpError.BadRequest('Price is required');
 	if (!image) throw createHttpError.BadRequest('Image is required');
 	if (!material) throw createHttpError.BadRequest('Material is required');
+	if (!style) throw createHttpError.BadRequest('Style is required');
 	if (!size) throw createHttpError.BadRequest('Size is required');
 	
 	const painting = await new PaintingModel({
@@ -43,6 +45,7 @@ export const createPainting = async ({
 		image,
         path: "/painting/",
 		material,
+		style,
 		size,
 	}).save();
 
