@@ -5,23 +5,24 @@ import PaintingModel from '../models/paintingModel.js';
 
 export const createPainting = async ({
 	authorId,
-	title,
+	name,
 	description,
 	price,
 	image,
 	material,
     author,
 	style,
+	sale,
 	size,
 }) => {
-	if (!title && !price && !description && !image && !material && !size)
+	if (!name && !price && !description && !image && !material && !size)
 		throw createHttpError.BadRequest(
 			'Title, price, description, image, material, style, size fields are required',
 		);
 
-	if (!title) throw createHttpError.BadRequest('Title is required');
+	if (!name) throw createHttpError.BadRequest('Title is required');
 
-	if (!validator.isLength(title, { min: 2 })) {
+	if (!validator.isLength(name, { min: 2 })) {
 		throw createHttpError.BadRequest('Title must be from 2 characters long');
 	}
 
@@ -39,13 +40,14 @@ export const createPainting = async ({
 	const painting = await new PaintingModel({
 		authorId,
         author,
-		title,
+		name,
 		description,
 		price,
 		image,
         path: "/painting/",
 		material,
 		style,
+		sale,
 		size,
 	}).save();
 

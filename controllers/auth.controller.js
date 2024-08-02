@@ -83,6 +83,16 @@ export const register = async (req, res, next) => {
 	}
 };
 
+export const getUsers = async (req, res, next) => {
+	try {
+		const users = await UserModel.find().sort({createdAt: -1})
+		if (!users) throw createHttpError.NotFound('No users.')
+		res.status(201).json(users)
+	} catch(error) {
+		next(error)
+	}
+}
+
 export const verifyEmail = async (req, res, next) => {
 	try {
 		const { token, id } = req.query;

@@ -9,7 +9,8 @@ import {
 	testAuthMiddleware,
 	forgotPassword,
 	resetPassword,
-	verifyEmail
+	verifyEmail,
+	getUsers
 } from '../controllers/auth.controller.js';
 import { authMiddleware } from '../middleware/auth.middleware.js';
 
@@ -21,6 +22,7 @@ router.route('/logout').post(trimRequest.all, logout);
 router.route('/forgot-password').post(trimRequest.all, forgotPassword);
 router.route('/reset-password').post(trimRequest.all, resetPassword);
 router.route('/verify-email').get(trimRequest.all, verifyEmail);
+router.route('/get-users').get(trimRequest.all, getUsers);
 
 router.route('/refreshtoken').post(trimRequest.all, refreshToken);
 router.route('/testing-auth-middleware').get(trimRequest.all, authMiddleware, testAuthMiddleware);

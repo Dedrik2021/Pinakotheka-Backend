@@ -10,7 +10,7 @@ const paintingSchema = mongoose.Schema({
         type: String,
         required: true
     },
-    title: {
+    name: {
         type: String,
         required: [true, 'Please provide a title'],
     },
@@ -21,6 +21,11 @@ const paintingSchema = mongoose.Schema({
     price: {
         type: Number,
         required: [true, 'Please provide a price'],
+    },
+    sale: {
+        type: Number,
+        default: null,
+        required: false
     },
     image: {
         type: String,
