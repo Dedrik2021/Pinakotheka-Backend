@@ -6,7 +6,7 @@ const paintingSchema = mongoose.Schema({
         ref: 'UserModel',
         required: true,
     },
-    author: {
+    authorName: {
         type: String,
         required: true
     },

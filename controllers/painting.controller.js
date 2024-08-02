@@ -7,7 +7,7 @@ import createHttpError from 'http-errors';
 
 export const add_painting = async (req, res, next) => {
 	try {
-		const { authorId, author, name, description, price, image, material, sale, size } = req.body;
+		const { authorId, authorName, name, description, price, image, material, sale, size } = req.body;
 		const newPainting = await createPainting({
 			authorId,
 			name,
@@ -15,7 +15,7 @@ export const add_painting = async (req, res, next) => {
 			price,
 			image,
 			material,
-			author,
+			authorName,
 			style,
 			size,
             sale
@@ -28,7 +28,7 @@ export const add_painting = async (req, res, next) => {
 				description: newPainting.description,
 				price: newPainting.price,
 				image: newPainting.image,
-				author: newPainting.author,
+				authorName: newPainting.authorName,
 				style: newPainting.style,
 				material: newPainting.material,
 				size: newPainting.size,

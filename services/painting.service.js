@@ -10,7 +10,7 @@ export const createPainting = async ({
 	price,
 	image,
 	material,
-    author,
+    authorName,
 	style,
 	sale,
 	size,
@@ -39,7 +39,7 @@ export const createPainting = async ({
 	
 	const painting = await new PaintingModel({
 		authorId,
-        author,
+        authorName,
 		name,
 		description,
 		price,

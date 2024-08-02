@@ -10,7 +10,7 @@ const { DEFAULT_PICTURE } = process.env;
 export const createUser = async ({
 	name,
 	email,
-	picture,
+	image,
 	phone,
 	author,
 	customer,
@@ -60,7 +60,7 @@ export const createUser = async ({
 	const user = await new UserModel({
 		name,
 		email,
-		picture: picture || DEFAULT_PICTURE,
+		image: image || DEFAULT_PICTURE,
 		phone,
 		author,
 		customer,

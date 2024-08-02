@@ -15,7 +15,7 @@ const email_service = process.env.EMAIL;
 
 export const register = async (req, res, next) => {
 	try {
-		const { name, email, picture, phone, author, customer, politics, password } = req.body;
+		const { name, email, image, phone, author, customer, politics, password } = req.body;
 
 		const emailVerificationToken = crypto.randomBytes(32).toString('hex');
 		const emailVerificationExpires = Date.now() + 24 * 60 * 60 * 1000; // 1 day
@@ -23,7 +23,7 @@ export const register = async (req, res, next) => {
 		const newUser = await createUser({
 			name,
 			email,
-			picture,
+			image,
 			phone,
 			author,
 			customer,
@@ -73,9 +73,11 @@ export const register = async (req, res, next) => {
 				author: newUser.author,
 				customer: newUser.customer,
 				politics: newUser.politics,
-				picture: newUser.picture,
+				image: newUser.image,
 				isEmailVerified: newUser.isEmailVerified,
 				token: '',
+				rating: newUser.rating,
+				path: newUser.path
 			},
 		});
 	} catch (error) {
