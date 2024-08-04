@@ -1,9 +1,8 @@
 import moment from 'moment';
+import createHttpError from 'http-errors';
 
 import { createPainting } from '../services/painting.service.js';
 import PaintingModel from '../models/paintingModel.js';
-import { io } from '../src/index.js';
-import createHttpError from 'http-errors';
 
 export const add_painting = async (req, res, next) => {
 	try {
@@ -32,7 +31,8 @@ export const add_painting = async (req, res, next) => {
 				style: newPainting.style,
 				material: newPainting.material,
 				size: newPainting.size,
-                sale: newPainting.sale
+                sale: newPainting.sale,
+                path: newPainting.path
 			},
 		});
 	} catch (error) {

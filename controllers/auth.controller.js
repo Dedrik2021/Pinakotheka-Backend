@@ -166,6 +166,8 @@ export const login = async (req, res, next) => {
 				picture: user.picture,
 				isEmailVerified: user.isEmailVerified,
 				token: access_token,
+				rating: user.rating,
+				path: user.path
 			},
 		});
 	} catch (error) {
@@ -212,6 +214,8 @@ export const refreshToken = async (req, res, next) => {
 				politics: user.politics,
 				picture: user.picture,
 				isEmailVerified: user.isEmailVerified,
+				rating: user.rating,
+				path: user.path
 			},
 		});
 	} catch (error) {
@@ -266,6 +270,8 @@ export const forgotPassword = async (req, res, next) => {
 				politics: user.politics,
 				picture: user.picture,
 				isEmailVerified: user.isEmailVerified,
+				rating: user.rating,
+				path: user.path
 			},
 		});
 	} catch (error) {
@@ -330,6 +336,8 @@ export const resetPassword = async (req, res, next) => {
 				politics: user.politics,
 				picture: user.picture,
 				isEmailVerified: user.isEmailVerified,
+				rating: user.rating,
+				path: user.path
 			},
 		});
 	} catch (error) {
