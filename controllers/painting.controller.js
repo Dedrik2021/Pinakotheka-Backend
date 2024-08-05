@@ -6,7 +6,7 @@ import PaintingModel from '../models/paintingModel.js';
 
 export const add_painting = async (req, res, next) => {
 	try {
-		const { authorId, authorName, name, description, price, image, material, sale, size } = req.body;
+		const { authorId, authorName, name, description, price, image, style, material, sale, size } = req.body;
 		const newPainting = await createPainting({
 			authorId,
 			name,
