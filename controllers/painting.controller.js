@@ -32,7 +32,8 @@ export const add_painting = async (req, res, next) => {
 				material: newPainting.material,
 				size: newPainting.size,
                 sale: newPainting.sale,
-                path: newPainting.path
+                path: newPainting.path,
+				categories: newPainting.categories
 			},
 		});
 	} catch (error) {

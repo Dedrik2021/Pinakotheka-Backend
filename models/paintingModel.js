@@ -46,6 +46,12 @@ const paintingSchema = mongoose.Schema({
     path: {
         type: String,
         required: true,
+        default: '/singlePainting/'
+    },
+    categories: {
+        type: String,
+        required: true,
+        default: 'Painting'
     }
 }, {
     collection: 'paintings',

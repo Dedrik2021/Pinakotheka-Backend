@@ -11,6 +11,12 @@ const userSchema = mongoose.Schema(
 		path: {
 			type: String,
 			required: true,
+			default: '/singleUser/'
+		},
+		categories: {
+			type: String,
+			required: true,
+			default: 'User'
 		},
 		rating: {
 			type: Number,

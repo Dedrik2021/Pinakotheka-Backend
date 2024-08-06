@@ -76,6 +76,7 @@ export const register = async (req, res, next) => {
 				image: newUser.image,
 				isEmailVerified: newUser.isEmailVerified,
 				token: '',
+				categories: newUser.categories,
 				rating: newUser.rating,
 				path: newUser.path
 			},
