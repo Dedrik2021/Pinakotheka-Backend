@@ -13,6 +13,7 @@ export const createPainting = async ({
     authorName,
 	style,
 	sale,
+	category,
 	size,
 }) => {
 	if (!name && !price && !description && !image && !material && !size)
@@ -31,6 +32,7 @@ export const createPainting = async ({
 		throw createHttpError.BadRequest('Description must be from 20 characters long');
 	}
 
+	if (!category) throw createHttpError.BadRequest('category is required');
 	if (!price) throw createHttpError.BadRequest('Price is required');
 	if (!image) throw createHttpError.BadRequest('Image is required');
 	if (!material) throw createHttpError.BadRequest('Material is required');
@@ -44,9 +46,9 @@ export const createPainting = async ({
 		description,
 		price,
 		image,
-        path: "/singlePainting/",
+        path: "/single-art/",
 		material,
-		categories: 'Painting',
+		category,
 		style,
 		sale,
 		size,

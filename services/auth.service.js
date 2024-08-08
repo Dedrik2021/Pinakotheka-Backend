@@ -66,7 +66,7 @@ export const createUser = async ({
 		customer,
 		politics,
 		password,
-		path: "/singleUser/",
+		path: "/single-user/",
 		categories: 'User',
 		rating: 0,
 		emailVerificationExpires,

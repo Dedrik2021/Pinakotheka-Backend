@@ -46,12 +46,12 @@ const paintingSchema = mongoose.Schema({
     path: {
         type: String,
         required: true,
-        default: '/singlePainting/'
+        default: '/single-art/'
     },
-    categories: {
+    category: {
         type: String,
         required: true,
-        default: 'Painting'
+        required: [true, 'Please provide a category'],
     }
 }, {
     collection: 'paintings',
