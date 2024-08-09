@@ -57,7 +57,6 @@ export const add_painting = async (req, res, next) => {
 export const filter_painting = async (req, res, next) => {
 	try {
 		const { titleFilterBtn } = req.body;
-		console.log(titleFilterBtn);
 		if (!titleFilterBtn) {
 			throw createHttpError.BadRequest('filter title btn is required');
 		}
@@ -65,6 +64,8 @@ export const filter_painting = async (req, res, next) => {
 		let paintings;
 		if (titleFilterBtn === 'random') {
 			paintings = await PaintingModel.find().sort({ createdAt: -1 });
+		} else if (titleFilterBtn === 'sale') {
+			paintings = await PaintingModel.find({sale: {$ne: null}}).sort({ createdAt: -1 });
 		} else if (titleFilterBtn === 'new') {
 			const twoDaysAgo = moment().subtract(7, 'days').toDate();
 			paintings = await PaintingModel.find({ createdAt: { $gte: twoDaysAgo } }).sort({
@@ -87,6 +88,7 @@ export const filter_painting = async (req, res, next) => {
 		} else {
 			throw createHttpError.BadRequest('Invalid filter title btn value');
 		}
+		
 
 		res.status(201).json(paintings || []);
 	} catch (error) {
