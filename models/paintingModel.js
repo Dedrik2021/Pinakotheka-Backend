@@ -32,11 +32,11 @@ const paintingSchema = mongoose.Schema({
         required: [true, 'Please provide an image'],
     },
     material: {
-        type: String,
+        type: [String],
         required: [true, 'Please provide a material'],
     },
     style: {
-        type: String,
+        type: [String],
         required: [true, 'Please provide a style'],
     },
     size: {

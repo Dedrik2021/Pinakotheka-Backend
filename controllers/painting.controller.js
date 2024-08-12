@@ -56,39 +56,84 @@ export const add_painting = async (req, res, next) => {
 
 export const filter_painting = async (req, res, next) => {
 	try {
-		const { titleFilterBtn } = req.body;
-		if (!titleFilterBtn) {
+		const { dependenciesArray, slug, price, sortOption } = req.body;
+		console.log(dependenciesArray.length);
+
+		if (!slug) {
 			throw createHttpError.BadRequest('filter title btn is required');
 		}
 
-		let paintings;
-		if (titleFilterBtn === 'random') {
-			paintings = await PaintingModel.find().sort({ createdAt: -1 });
-		} else if (titleFilterBtn === 'sale') {
-			paintings = await PaintingModel.find({sale: {$ne: null}}).sort({ createdAt: -1 });
-		} else if (titleFilterBtn === 'new') {
-			const twoDaysAgo = moment().subtract(7, 'days').toDate();
-			paintings = await PaintingModel.find({ createdAt: { $gte: twoDaysAgo } }).sort({
-				createdAt: -1,
+		let filterConditions = {};
+
+		if (typeof slug === 'string') {
+			if (slug === 'random') {
+				filterConditions = {};
+			} else if (slug === 'sale') {
+				filterConditions.sale = { $ne: null };
+			} else if (slug === 'new') {
+				const sevenDaysAgo = moment().subtract(7, 'days').toDate();
+				filterConditions.createdAt = { $gte: sevenDaysAgo };
+			} else if (
+				['paintings', 'sculptures', 'drawings', 'digital-arts', 'handmades'].includes(slug)
+			) {
+				filterConditions.category = slug;
+			} else {
+				throw createHttpError.BadRequest('Invalid filter title btn value');
+			}
+		}
+
+		if (dependenciesArray && Array.isArray(dependenciesArray) && dependenciesArray.length > 0) {
+			let styles = [];
+			let materials = [];
+			let sizes = [];
+
+			// Extract relevant filters from dependenciesArray
+			dependenciesArray.forEach((dep) => {
+				if (dep.type === 'style') {
+					styles.push(dep.value);
+				} else if (dep.type === 'material') {
+					materials.push(dep.value);
+				} else if (dep.type === 'size') {
+					sizes.push(dep.value);
+				}
 			});
-		} else if (titleFilterBtn === 'paintings') {
-			paintings = await PaintingModel.find({ category: titleFilterBtn }).sort({ createdAt: -1 });
-		} else if (titleFilterBtn === 'sculptures') {
-			paintings = await PaintingModel.find({ category: titleFilterBtn }).sort({
-				createdAt: -1,
-			});
-		} else if (titleFilterBtn === 'drawings') {
-			paintings = await PaintingModel.find({ category: titleFilterBtn }).sort({ createdAt: -1 });
-		} else if (titleFilterBtn === 'digital-arts') {
-			paintings = await PaintingModel.find({ category: titleFilterBtn }).sort({
-				createdAt: -1,
-			});
-		} else if (titleFilterBtn === 'handmades') {
-			paintings = await PaintingModel.find({ category: titleFilterBtn }).sort({ createdAt: -1 });
-		} else {
-			throw createHttpError.BadRequest('Invalid filter title btn value');
+
+			// Build the $and condition to match all filters
+			const andConditions = [];
+
+			if (styles.length > 0) {
+				andConditions.push({ style: { $in: styles } });
+			}
+			if (materials.length > 0) {
+				andConditions.push({ material: { $in: materials } });
+			}
+			if (sizes.length > 0) {
+				andConditions.push({ size: { $in: sizes } });
+			}
+
+			if (andConditions.length > 0) {
+				filterConditions.$and = andConditions;
+			}
+		}
+
+		if (price && typeof price.min === 'number' && typeof price.max === 'number') {
+			filterConditions.price = {
+				$gte: price.min,
+				$lte: price.max,
+			};
 		}
 		
+		let sortCondition = {};
+        if (sortOption === 'price up') {
+            sortCondition.price = 1; // Ascending order
+        } else if (sortOption === 'price down') {
+            sortCondition.price = -1; // Descending order
+        } else if (sortOption === 'sale') {
+            // Sorting by sale might require different logic
+            filterConditions.sale = { $ne: null }; // Descending order by sale value
+        }
+
+		const paintings = await PaintingModel.find(filterConditions).sort(sortCondition);
 
 		res.status(201).json(paintings || []);
 	} catch (error) {
