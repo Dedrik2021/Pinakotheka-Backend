@@ -57,7 +57,6 @@ export const add_painting = async (req, res, next) => {
 export const filter_painting = async (req, res, next) => {
 	try {
 		const { dependenciesArray, slug, price, sortOption } = req.body;
-		console.log(dependenciesArray.length);
 
 		if (!slug) {
 			throw createHttpError.BadRequest('filter title btn is required');
@@ -153,8 +152,8 @@ export const get_paintings = async (req, res, next) => {
 export const get_paintings_by_author_id = async (req, res, next) => {
 	try {
 		const { authorId } = req.body;
-		if (authorId) throw createHttpError.BadRequest('AuthorId is missing');
-		const paintings = await PaintingModel.find({ authorId });
+		if (!authorId) throw createHttpError.BadRequest('AuthorId is missing');
+		const paintings = await PaintingModel.findById(authorId);
 		res.status(200).json(paintings);
 	} catch (error) {
 		next(error);
@@ -163,9 +162,12 @@ export const get_paintings_by_author_id = async (req, res, next) => {
 
 export const get_painting_by_id = async (req, res, next) => {
 	try {
-		const { paintingId } = req.body;
-		if (authorId) throw createHttpError.BadRequest('PaintingId is missing');
+		const { paintingId } = req.params;
+		
+		if (!paintingId) throw createHttpError.BadRequest('PaintingId is missing');
 		const painting = await PaintingModel.findById(paintingId);
+
+		if (!painting) throw createHttpError.NotFound('Painting not found');
 		res.status(200).json(painting);
 	} catch (error) {
 		next(error);
