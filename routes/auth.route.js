@@ -10,12 +10,14 @@ import {
 	forgotPassword,
 	resetPassword,
 	verifyEmail,
-	getUsers
+	getUsers,
+	get_author_by_id
 } from '../controllers/auth.controller.js';
 import { authMiddleware } from '../middleware/auth.middleware.js';
 
 const router = express.Router();
 
+router.route('/get-author-by-id/:authorId').get(trimRequest.all, get_author_by_id);
 router.route('/register').post(trimRequest.all, register);
 router.route('/login').post(trimRequest.all, login);
 router.route('/logout').post(trimRequest.all, logout);

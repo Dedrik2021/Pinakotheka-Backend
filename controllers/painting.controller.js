@@ -151,9 +151,9 @@ export const get_paintings = async (req, res, next) => {
 
 export const get_paintings_by_author_id = async (req, res, next) => {
 	try {
-		const { authorId } = req.body;
+		const { authorId } = req.params;
 		if (!authorId) throw createHttpError.BadRequest('AuthorId is missing');
-		const paintings = await PaintingModel.findById(authorId);
+		const paintings = await PaintingModel.find({authorId});
 		res.status(200).json(paintings);
 	} catch (error) {
 		next(error);

@@ -78,7 +78,7 @@ export const register = async (req, res, next) => {
 				token: '',
 				categories: newUser.categories,
 				rating: newUser.rating,
-				path: newUser.path
+				path: newUser.path,
 			},
 		});
 	} catch (error) {
@@ -88,13 +88,13 @@ export const register = async (req, res, next) => {
 
 export const getUsers = async (req, res, next) => {
 	try {
-		const users = await UserModel.find().sort({createdAt: -1})
-		if (!users) throw createHttpError.NotFound('No users.')
-		res.status(201).json(users)
-	} catch(error) {
-		next(error)
+		const users = await UserModel.find().sort({ createdAt: -1 });
+		if (!users) throw createHttpError.NotFound('No users.');
+		res.status(201).json(users);
+	} catch (error) {
+		next(error);
 	}
-}
+};
 
 export const verifyEmail = async (req, res, next) => {
 	try {
@@ -168,7 +168,7 @@ export const login = async (req, res, next) => {
 				isEmailVerified: user.isEmailVerified,
 				token: access_token,
 				rating: user.rating,
-				path: user.path
+				path: user.path,
 			},
 		});
 	} catch (error) {
@@ -216,7 +216,7 @@ export const refreshToken = async (req, res, next) => {
 				picture: user.picture,
 				isEmailVerified: user.isEmailVerified,
 				rating: user.rating,
-				path: user.path
+				path: user.path,
 			},
 		});
 	} catch (error) {
@@ -272,7 +272,7 @@ export const forgotPassword = async (req, res, next) => {
 				picture: user.picture,
 				isEmailVerified: user.isEmailVerified,
 				rating: user.rating,
-				path: user.path
+				path: user.path,
 			},
 		});
 	} catch (error) {
@@ -338,7 +338,7 @@ export const resetPassword = async (req, res, next) => {
 				picture: user.picture,
 				isEmailVerified: user.isEmailVerified,
 				rating: user.rating,
-				path: user.path
+				path: user.path,
 			},
 		});
 	} catch (error) {
@@ -348,4 +348,18 @@ export const resetPassword = async (req, res, next) => {
 
 export const testAuthMiddleware = async (req, res) => {
 	res.status(201).json(req.user);
+};
+
+export const get_author_by_id = async (req, res, next) => {
+	try {
+		const { authorId } = req.params;
+
+		if (!authorId) {
+			throw createHttpError.BadRequest('AuthorId is missing');
+		}
+		const author = await UserModel.findById(authorId);
+		res.status(201).json(author);
+	} catch (error) {
+		next(error);
+	}
 };
