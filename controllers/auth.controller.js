@@ -79,6 +79,10 @@ export const register = async (req, res, next) => {
 				categories: newUser.categories,
 				rating: newUser.rating,
 				path: newUser.path,
+				about: newUser.about,
+				facebook: newUser.facebook,
+				twitter: newUser.twitter,
+				instagram: newUser.instagram,
 			},
 		});
 	} catch (error) {
@@ -169,6 +173,10 @@ export const login = async (req, res, next) => {
 				token: access_token,
 				rating: user.rating,
 				path: user.path,
+				about: user.about,
+				facebook: user.facebook,
+				twitter: user.twitter,
+				instagram: user.instagram,
 			},
 		});
 	} catch (error) {
@@ -217,6 +225,10 @@ export const refreshToken = async (req, res, next) => {
 				isEmailVerified: user.isEmailVerified,
 				rating: user.rating,
 				path: user.path,
+				about: user.about,
+				facebook: user.facebook,
+				twitter: user.twitter,
+				instagram: user.instagram,
 			},
 		});
 	} catch (error) {
@@ -273,6 +285,10 @@ export const forgotPassword = async (req, res, next) => {
 				isEmailVerified: user.isEmailVerified,
 				rating: user.rating,
 				path: user.path,
+				about: user.about,
+				facebook: user.facebook,
+				twitter: user.twitter,
+				instagram: user.instagram,
 			},
 		});
 	} catch (error) {
@@ -339,6 +355,11 @@ export const resetPassword = async (req, res, next) => {
 				isEmailVerified: user.isEmailVerified,
 				rating: user.rating,
 				path: user.path,
+				about: user.about,
+				facebook: user.facebook,
+				twitter: user.twitter,
+				instagram: user.instagram,
+
 			},
 		});
 	} catch (error) {
