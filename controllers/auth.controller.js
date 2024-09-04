@@ -83,6 +83,7 @@ export const register = async (req, res, next) => {
 				facebook: newUser.facebook,
 				twitter: newUser.twitter,
 				instagram: newUser.instagram,
+				unreadMessages: newUser.unreadMessages,
 			},
 		});
 	} catch (error) {
@@ -95,6 +96,56 @@ export const getUsers = async (req, res, next) => {
 		const users = await UserModel.find().sort({ createdAt: -1 });
 		if (!users) throw createHttpError.NotFound('No users.');
 		res.status(201).json(users);
+	} catch (error) {
+		next(error);
+	}
+};
+
+export const refreshUser = async (req, res, next) => {
+	try {
+		const { userId } = req.params;
+		const user = await UserModel.findById(userId);
+		if (!user) throw createHttpError.NotFound('No user.');
+
+		const access_token = await generateToken(
+			{ userId: user._id },
+			'7d',
+			process.env.ACCESS_TOKEN,
+		);
+		const refresh_token = await generateToken(
+			{ userId: user._id },
+			'30d',
+			process.env.REFRESH_TOKEN,
+		);
+
+		res.cookie('refreshtoken', refresh_token, {
+			httpOnly: true,
+			path: '/api/v1/auth/refreshtoken',
+			maxAge: 30 * 24 * 60 * 60 * 1000,
+		});
+
+		res.status(201).json({
+			access_token,
+			user: {
+				_id: user._id,
+				name: user.name,
+				phone: user.phone,
+				email: user.email,
+				author: user.author,
+				customer: user.customer,
+				politics: user.politics,
+				picture: user.picture,
+				isEmailVerified: user.isEmailVerified,
+				token: access_token,
+				rating: user.rating,
+				path: user.path,
+				about: user.about,
+				facebook: user.facebook,
+				twitter: user.twitter,
+				instagram: user.instagram,
+				unreadMessages: user.unreadMessages,
+			},
+		});
 	} catch (error) {
 		next(error);
 	}
@@ -177,6 +228,7 @@ export const login = async (req, res, next) => {
 				facebook: user.facebook,
 				twitter: user.twitter,
 				instagram: user.instagram,
+				unreadMessages: user.unreadMessages,
 			},
 		});
 	} catch (error) {
@@ -229,6 +281,7 @@ export const refreshToken = async (req, res, next) => {
 				facebook: user.facebook,
 				twitter: user.twitter,
 				instagram: user.instagram,
+				unreadMessages: user.unreadMessages,
 			},
 		});
 	} catch (error) {
@@ -289,6 +342,7 @@ export const forgotPassword = async (req, res, next) => {
 				facebook: user.facebook,
 				twitter: user.twitter,
 				instagram: user.instagram,
+				unreadMessages: user.unreadMessages,
 			},
 		});
 	} catch (error) {
@@ -359,7 +413,7 @@ export const resetPassword = async (req, res, next) => {
 				facebook: user.facebook,
 				twitter: user.twitter,
 				instagram: user.instagram,
-
+				unreadMessages: user.unreadMessages,
 			},
 		});
 	} catch (error) {
