@@ -11,16 +11,32 @@ const userSchema = mongoose.Schema(
 		path: {
 			type: String,
 			required: true,
-			default: '/singleUser/'
+			default: '/singleUser/',
 		},
 		categories: {
 			type: String,
 			required: true,
-			default: 'User'
+			default: 'User',
+		},
+		about: {
+			type: String,
+			required: [true, 'Please provide your about'],
+		},
+		facebook: {
+			type: String,
+			required: false,
+		},
+		twitter: {
+			type: String,
+			required: false,
+		},
+		instagram: {
+			type: String,
+			required: false,
 		},
 		rating: {
 			type: Number,
-			required: true,
+			required: false,
 		},
 		email: {
 			type: String,
@@ -82,6 +98,11 @@ const userSchema = mongoose.Schema(
 		isEmailVerified: {
 			type: Boolean,
 			default: false,
+		},
+		unreadMessages: {
+			type: Map,
+			of: Number,
+			default: {},
 		},
 	},
 	{
