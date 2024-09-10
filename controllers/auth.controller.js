@@ -3,13 +3,20 @@ import dotenv from 'dotenv';
 import crypto from 'crypto';
 dotenv.config();
 
-import { createUser, signUser, verifyToken, passwordForgot } from '../services/auth.service.js';
+import {
+	createUser,
+	signUser,
+	verifyToken,
+	passwordForgot,
+	removeUnreadMessage,
+} from '../services/auth.service.js';
 import { generateToken } from '../services/token.service.js';
 import { findUser } from '../services/user.service.js';
 import PasswordResetToken from '../models/passwordResetTokenModel.js';
 import { generateRandomByte } from '../utils/helper.js';
 import { transport } from '../utils/mail.js';
 import UserModel from '../models/index.js';
+import logger from '../configs/logger.config.js';
 
 const email_service = process.env.EMAIL;
 
@@ -434,6 +441,45 @@ export const get_author_by_id = async (req, res, next) => {
 		}
 		const author = await UserModel.findById(authorId);
 		res.status(201).json(author);
+	} catch (error) {
+		next(error);
+	}
+};
+
+export const updateUnreadMessages = async (req, res, next) => {
+	try {
+		const { userId, senderId } = req.params;
+		console.log(userId, senderId);
+		const user = await removeUnreadMessage(userId, senderId);
+
+		const access_token = await generateToken(
+			{ userId: user._id },
+			'7d',
+			process.env.ACCESS_TOKEN,
+		);
+
+		res.status(201).json({
+			access_token,
+			user: {
+				_id: user._id,
+				name: user.name,
+				phone: user.phone,
+				email: user.email,
+				author: user.author,
+				customer: user.customer,
+				token: '',
+				politics: user.politics,
+				picture: user.picture,
+				isEmailVerified: user.isEmailVerified,
+				rating: user.rating,
+				path: user.path,
+				about: user.about,
+				facebook: user.facebook,
+				twitter: user.twitter,
+				instagram: user.instagram,
+				unreadMessages: user.unreadMessages,
+			},
+		});
 	} catch (error) {
 		next(error);
 	}
