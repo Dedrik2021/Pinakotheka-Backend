@@ -66,43 +66,61 @@ export const createUser = async ({
 		customer,
 		politics,
 		password,
-		path: "/single-user/",
+		about: `Hi this is ${name}`,
+		path: '/single-user/',
 		categories: 'User',
 		rating: 0,
 		emailVerificationExpires,
-		emailVerificationToken
+		emailVerificationToken,
+		facebook: '',
+		twitter: '',
+		instagram: '',
 	}).save();
 
 	return user;
 };
 
 export const signUser = async (email, password) => {
-    if (!email && !password) throw createHttpError.BadRequest('All fields are required');
+	if (!email && !password) throw createHttpError.BadRequest('All fields are required');
 
-    if (!email) throw createHttpError.BadRequest('Email is required');
+	if (!email) throw createHttpError.BadRequest('Email is required');
 
 	const user = await UserModel.findOne({ email: email.toLowerCase() }).lean();
 	if (!user) throw createHttpError.NotFound('Invalid Email');
 
-	
-    if (!password) throw createHttpError.BadRequest('Password is required');
+	if (!password) throw createHttpError.BadRequest('Password is required');
 
-	
 	const passwordMatches = await bcrypt.compare(password, user.password);
 	if (!passwordMatches) throw createHttpError.NotFound('Invalid Password');
 
 	if (!user.isEmailVerified) throw createHttpError.BadRequest('Please verify your email');
-	
+
 	return user;
 };
 
 export const passwordForgot = async (email) => {
-    if (!email) throw createHttpError.BadRequest('Email is required');
-    const user = await UserModel.findOne({ email: email.toLowerCase() }).lean();
-    if (!user) throw createHttpError.NotFound('Invalid Email');
-    return user;
+	if (!email) throw createHttpError.BadRequest('Email is required');
+	const user = await UserModel.findOne({ email: email.toLowerCase() }).lean();
+	if (!user) throw createHttpError.NotFound('Invalid Email');
+	return user;
 };
 
 export const verifyToken = async (token, secret) => {
 	return await verify(token, secret);
+};
+
+export const removeUnreadMessage = async (userId, messageIdToRemove) => {
+	try {
+		// Use the $unset operator to remove the specific key from unreadMessages
+		const updatedUser = await UserModel.findByIdAndUpdate(
+			userId,
+			{ $unset: { [`unreadMessages.${messageIdToRemove}`]: 1 } }, // Dynamically remove the messageId
+			{ new: true }, // Return the updated document
+		);
+
+		return updatedUser; // Return the updated user object
+	} catch (error) {
+		console.error('Error removing unread message:', error);
+		throw error;
+	}
 };
