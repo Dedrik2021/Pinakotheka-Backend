@@ -12,10 +12,6 @@ const messageSchema = mongoose.Schema(
 			ref: 'UserModel',
 			required: [true, 'Please provide a authorId'],
 		},
-		isRead: {
-			type: Boolean,
-			default: false,
-		},
 		message: {
 			type: String,
 			required: [true, 'Please provide a message'],
