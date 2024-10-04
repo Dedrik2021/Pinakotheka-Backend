@@ -48,3 +48,14 @@ export const getMessagesByUserIdAndAuthorId = async (req, res, next) => {
         next(error)
     }
 }
+
+export const removeMessageById = async (req, res, next) => {
+    try {
+        const { messageId } = req.params
+        
+        const message = await MessageModel.findByIdAndDelete(messageId)
+        res.status(201).json(message)
+    } catch (error) {
+        next(error)
+    }
+}
