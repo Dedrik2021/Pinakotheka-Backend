@@ -49,13 +49,24 @@ export const getMessagesByUserIdAndAuthorId = async (req, res, next) => {
     }
 }
 
-export const removeMessageById = async (req, res, next) => {
+export const updateAndRemoveDeletedMessageById = async (req, res, next) => {
     try {
-        const { messageId } = req.params
+        const { messageId } = req.params;
+
+        let message = await MessageModel.findById(messageId);
+        if (!message) {
+            return res.status(404).json({ error: 'Message not found' });
+        }
+
+        message.message = 'This message has been deleted';
+        await message.save(); 
+
         
-        const message = await MessageModel.findByIdAndDelete(messageId)
-        res.status(201).json(message)
+        res.status(200).json(message);
+        setTimeout(async () => {
+            await MessageModel.findByIdAndDelete(messageId);
+        }, 24 * 60 * 60 * 1000); // 24 hours in milliseconds 
     } catch (error) {
-        next(error)
+        next(error);
     }
-}
+};
