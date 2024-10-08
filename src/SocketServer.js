@@ -1,4 +1,10 @@
 export default function (socket, io) {
+    socket.on('join', (user) => {
+        console.log('user joined', user);
+        socket.join(user)
+    })
+
+
     //added new painting in db
 	socket.on('newPainting', (newPainting) => {
         io.emit('get-paintings', newPainting)
@@ -19,7 +25,7 @@ export default function (socket, io) {
 
     //typing
     socket.on('typing', (conversation) => {
-        socket.in(conversation).emit('typing')
+        socket.in(conversation).emit('typing', conversation)
     })
 
     //stop typing
