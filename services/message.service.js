@@ -16,3 +16,29 @@ export const createMessage = async ({ userId, authorId, message }) => {
 
 	return product;
 };
+
+export const deleteMessagesByUser = async (userId, authorId) => {
+    try {
+        const result = await MessageModel.deleteMany({
+            userId,
+            authorId
+        });
+
+        console.log(`${result.deletedCount} messages deleted after 24 hours.`);
+    } catch (error) {
+        console.error('Error deleting messages:', error);
+    }
+};
+
+export const updateDeletedMessagesByUser = async (userId, authorId) => {
+    try {
+        const result = await MessageModel.updateMany({
+            userId,
+            authorId
+        }, { $set: { message: 'This message has been deleted' } } );
+
+        console.log(`${result.deletedCount} messages deleted after 24 hours.`);
+    } catch (error) {
+        console.error('Error deleting messages:', error);
+    }
+};
