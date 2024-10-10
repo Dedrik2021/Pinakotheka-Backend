@@ -449,7 +449,7 @@ export const get_author_by_id = async (req, res, next) => {
 export const updateUnreadMessages = async (req, res, next) => {
 	try {
 		const { userId, senderId } = req.params;
-		console.log(userId, senderId);
+		console.log('........................', userId, senderId);
 		const user = await removeUnreadMessage(userId, senderId);
 
 		const access_token = await generateToken(
