@@ -40,9 +40,9 @@ export const io = new Server(server, {
 io.on('connection', (socket) => {
 	logger.info(`Socket message connected successfully`);
 	SocketServer(socket, io);
-	socket.on("create-painting", (painting) => {
-		io.emit("newPainting", painting)
-	})
+	// socket.on("create-painting", (painting) => {
+	// 	io.emit("newPainting", painting)
+	// })
 });
 
 const exitHandler = () => {
